@@ -66,18 +66,7 @@ void *m_malloc(size_t size) {
  total_size = size + META_SIZE;
   base = sbrk(0);
   last = base;
-if(result == -1 || (!result->next && (!result->free || result->free && result->size<size))){
- p_meta temp = last;
- last += total_size;
- if(brk(last)==-1) return((void*)0);
- temp->free = 0;
- temp->next =0;
- temp ->prev = result;
- temp ->size = size;
- if(result!=-1) result->next = temp;
- result = temp;
 
- }
 return result ->data;
    
 }
@@ -85,25 +74,6 @@ return result ->data;
 void m_free(void *ptr) {
    p_meta index = ptr -META_SIZE;
    index->free = 1;
- if(index->next && index->next->free == 1) {
- index->size += index->next->size + META_SIZE;
- index->next = index->next->next;
-}
- if(index->prev!=-1){
- if(index->prev->free){
- index= index->prev;
- index->size += index->next->size+META_SIZE;
- index->next = index->next->next;
-}
- if(!index->next){
- last = index->size + META_SIZE;
- index->prev->next = 0;
-}
-}
-else if(!index->next && !index->prev){
-last = base;
-}
-ptr = 0;
 }
 
 void *m_realloc(void* ptr, size_t size){
